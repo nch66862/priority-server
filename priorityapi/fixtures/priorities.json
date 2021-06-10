@@ -1,0 +1,26 @@
+[
+{
+    "model": "priorityapi.priority",
+    "pk": 1,
+    "fields": {
+        "priority_user": 1,
+        "priority": "My Children",
+        "why": "they are the gift to the next generation",
+        "how": 20,
+        "is_public": true,
+        "creation_date": "2021-06-10T19:30:05Z"
+    }
+},
+{
+    "model": "priorityapi.priority",
+    "pk": 2,
+    "fields": {
+        "priority_user": 2,
+        "priority": "Other people",
+        "why": "I am not here to be self-serving",
+        "how": 60,
+        "is_public": false,
+        "creation_date": "2021-06-10T19:32:21Z"
+    }
+}
+]

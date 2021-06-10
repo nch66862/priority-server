@@ -1,0 +1,38 @@
+[
+{
+    "model": "priorityapi.what",
+    "pk": 1,
+    "fields": {
+        "priority": 1,
+        "what": "Read to them",
+        "is_deleted": false
+    }
+},
+{
+    "model": "priorityapi.what",
+    "pk": 2,
+    "fields": {
+        "priority": 1,
+        "what": "Make them have their friends over",
+        "is_deleted": false
+    }
+},
+{
+    "model": "priorityapi.what",
+    "pk": 3,
+    "fields": {
+        "priority": 2,
+        "what": "Have another family over for dinner",
+        "is_deleted": false
+    }
+},
+{
+    "model": "priorityapi.what",
+    "pk": 4,
+    "fields": {
+        "priority": 2,
+        "what": "Pick up a friend from the airport",
+        "is_deleted": false
+    }
+}
+]
