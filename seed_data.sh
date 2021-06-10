@@ -1,4 +1,5 @@
 #!/bin/bash
+# type this (./seed_data.sh) into terminal to run
 
 rm db.sqlite3
 python manage.py migrate
