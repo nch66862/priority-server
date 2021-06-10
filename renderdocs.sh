@@ -1,5 +1,5 @@
 #!/bin/bash
-# run ./renderdocs.sh
+# run sh ./renderdocs.sh
 
 apidoc  -v --debug -i ./priorityapi/views -f .py -o docs/
 

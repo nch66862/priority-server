@@ -1,0 +1,16 @@
+[
+{
+    "model": "priorityapi.priorityuser",
+    "pk": 1,
+    "fields": {
+        "user": 1
+    }
+},
+{
+    "model": "priorityapi.priorityuser",
+    "pk": 2,
+    "fields": {
+        "user": 2
+    }
+}
+]
