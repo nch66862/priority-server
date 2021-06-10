@@ -8,4 +8,4 @@ class Priority(models.Model):
     why = models.CharField(max_length=200)
     how = models.IntegerField()
     is_public = models.BooleanField(default=False)
-    creation_date = models.DateTimeField(default=timezone.now())
+    creation_date = models.DateTimeField(default=timezone.now)
