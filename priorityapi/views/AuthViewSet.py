@@ -4,11 +4,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from django.views.decorators.csrf import csrf_exempt
-from rareapi.models import RareUser
-from rest_framework.decorators import api_view
-from django.core.files.base import ContentFile
-import base64
-import uuid
+from priorityapi.models import PriorityUser, Priority, What
 
 @csrf_exempt
 def login_user(request):
@@ -54,7 +50,7 @@ def register_user(request):
     # Create a new user by invoking the `create_user` helper method
     # on Django's built-in User model
     new_user = User.objects.create_user(
-        username=req_body['username'],
+        username=req_body['email'],
         first_name=req_body['first_name'],
         last_name=req_body['last_name'],
         email=req_body['email'],
@@ -64,23 +60,21 @@ def register_user(request):
 
     # Now save the extra info in the levelupapi_gamer table
 
-    rare_user = RareUser.objects.create(
-        bio=req_body['bio'],
+    new_priority_user = PriorityUser.objects.create(
         user=new_user
     )
-    if req_body["profile_image_url"] == "":
-        rare_user.profile_image = "profile_images/12-f992eaef-09f3-40e0-8da0-39817f4fab3a.jpeg"
-    else:
-        format, imgstr = req_body["profile_image_url"].split(';base64,')
-        ext = format.split('/')[-1]
-        data = ContentFile(base64.b64decode(imgstr), name=f'{rare_user.id}-{uuid.uuid4()}.{ext}')
 
-        rare_user.profile_image = data
-    rare_user.save()
+    new_priority = Priority.objects.create(
+        priority_user=new_priority_user,
+        priority=req_body['priority'],
+        why=req_body['why'],
+        how=req_body['how']
+    )
 
-    #Give user default permissions
-    permissions = [46, 48, 33, 34, 35, 49, 50, 51, 57, 58, 59]
-    new_user.user_permissions.set(permissions)
+    What.objects.create(
+        priority=new_priority,
+        what=req_body['what']
+    )
 
     # Use the REST Framework's token generator on the new user account
     token = Token.objects.create(user=new_user)
