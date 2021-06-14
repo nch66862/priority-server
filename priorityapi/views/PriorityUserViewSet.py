@@ -90,12 +90,12 @@ class PriorityUserViewSet(ViewSet):
         except:
             response = json.dumps({"subscribed": False})
             return HttpResponse(response, content_type='application/json')
-    @action(methods=["post"], detail=False)
+    @action(methods=["GET"], detail=False)
     def my_profile(self, request):
         user = PriorityUser.objects.get(user=request.auth.user)
         histories = History.objects.filter(what__priority__priority_user=user)
         serializer = HistorySerializer(histories, many=True, context={'request': request})
-        return Response(serializer.data["id"])
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
