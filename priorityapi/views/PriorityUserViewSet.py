@@ -1,6 +1,6 @@
 from django.http.response import HttpResponse
 from rest_framework.decorators import action
-from priorityapi.models import PriorityUser, Subscription, History
+from priorityapi.models import PriorityUser, Subscription, History, What, Priority
 from django.contrib.auth.models import User
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
@@ -111,17 +111,17 @@ class PriorityUserSerializer(serializers.ModelSerializer):
 class PrioritySerializer(serializers.ModelSerializer):
     priority_user = PriorityUserSerializer(many=False)
     class Meta:
-        model = PriorityUser
+        model = Priority
         fields = ('priority_user', 'priority', 'why', 'how', 'is_public', 'creation_date')
 
 class WhatSerializer(serializers.ModelSerializer):
     priority = PrioritySerializer(many=False)
     class Meta:
-        model = PriorityUser
+        model = What
         fields = ('id', 'priority', 'what', 'is_deleted')
 
 class HistorySerializer(serializers.ModelSerializer):
     what = WhatSerializer(many=False)
     class Meta:
-        model = PriorityUser
+        model = History
         fields = ('id', 'what', 'submission_date', 'goal_date', 'time_spent')
