@@ -99,9 +99,9 @@ class PriorityUserViewSet(ViewSet):
         histories = History.objects.filter(what__priority__priority_user=user)
         history_serialized = HistorySerializer(histories, many=True, context={'request': request})
         response = {}
-        response.user = user_serialized.data
-        response.priority = priority_serialized.data
-        response.histories = history_serialized.data
+        response['user'] = user_serialized.data
+        response['priority'] = priority_serialized.data
+        response['history'] = history_serialized.data
         return Response(response, status=status.HTTP_200_OK)
 
 class UserSerializer(serializers.ModelSerializer):
