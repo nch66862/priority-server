@@ -93,9 +93,16 @@ class PriorityUserViewSet(ViewSet):
     @action(methods=["GET"], detail=False)
     def my_profile(self, request):
         user = PriorityUser.objects.get(user=request.auth.user)
+        user_serialized = PriorityUserSerializer(user, context={'request': request})
+        priority = Priority.objects.get(priority_user_id=user.id)
+        priority_serialized = PrioritySerializer(priority, context={'request': request})
         histories = History.objects.filter(what__priority__priority_user=user)
-        serializer = HistorySerializer(histories, many=True, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        history_serialized = HistorySerializer(histories, many=True, context={'request': request})
+        response = {}
+        response.user = user_serialized.data
+        response.priority = priority_serialized.data
+        response.histories = history_serialized.data
+        return Response(response, status=status.HTTP_200_OK)
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -109,13 +116,11 @@ class PriorityUserSerializer(serializers.ModelSerializer):
         fields = ('user',)
 
 class PrioritySerializer(serializers.ModelSerializer):
-    priority_user = PriorityUserSerializer(many=False)
     class Meta:
         model = Priority
         fields = ('priority_user', 'priority', 'why', 'how', 'is_public', 'creation_date')
 
 class WhatSerializer(serializers.ModelSerializer):
-    priority = PrioritySerializer(many=False)
     class Meta:
         model = What
         fields = ('id', 'priority', 'what', 'is_deleted')
