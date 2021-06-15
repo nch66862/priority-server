@@ -1,6 +1,6 @@
 from django.http.response import HttpResponse
 from rest_framework.decorators import action
-from priorityapi.models import PriorityUser, Subscription
+from priorityapi.models import PriorityUser, Subscription, History, What, Priority
 from django.contrib.auth.models import User
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
@@ -17,14 +17,14 @@ class PriorityUserViewSet(ViewSet):
             user = PriorityUser.objects.get(pk=pk)
             subscribers = Subscription.objects.filter(author=pk, ended_on=None).count()
             user.subscribers = subscribers
-            serializer = RareUserSerializer(user, context={'request': request})
+            serializer = PriorityUserSerializer(user, context={'request': request})
             return Response(serializer.data)
         except Exception as ex:
             return HttpResponseServerError(ex)
     #only returns list of active users
     def list(self, request):
         users = PriorityUser.objects.order_by('user__first_name').exclude(user=request.user).exclude(user__is_active=False)
-        serializer = RareUserSerializer(users, many=True, context={'request': request})
+        serializer = PriorityUserSerializer(users, many=True, context={'request': request})
         return Response(serializer.data)
     def update(self, request, pk):
         if not request.auth.user.has_perm('rareapi.change_rareuser'):
@@ -52,7 +52,7 @@ class PriorityUserViewSet(ViewSet):
         if not request.auth.user.has_perm('rareapi.view_rareuser'):
             raise PermissionDenied()
         users = PriorityUser.objects.order_by('user__first_name').exclude(user=request.user).exclude(user__is_active=True)
-        serializer = RareUserSerializer(users, many=True, context={'request': request})
+        serializer = PriorityUserSerializer(users, many=True, context={'request': request})
         return Response(serializer.data)
 
     @action(methods=["post", "delete" ], detail=False)
@@ -90,24 +90,43 @@ class PriorityUserViewSet(ViewSet):
         except:
             response = json.dumps({"subscribed": False})
             return HttpResponse(response, content_type='application/json')
-    @action(detail=False)
-    def user_profile(self, request):
+    @action(methods=["GET"], detail=False)
+    def my_profile(self, request):
         user = PriorityUser.objects.get(user=request.auth.user)
-        serializer = RareUserSerializer(user, many=False, context={'request': request})
-        return Response(serializer.data["id"])
+        user_serialized = PriorityUserSerializer(user, context={'request': request})
+        priority = Priority.objects.get(priority_user_id=user.id)
+        priority_serialized = PrioritySerializer(priority, context={'request': request})
+        histories = History.objects.filter(what__priority__priority_user=user)
+        history_serialized = HistorySerializer(histories, many=True, context={'request': request})
+        response = {}
+        response['user'] = user_serialized.data
+        response['priority'] = priority_serialized.data
+        response['history'] = history_serialized.data
+        return Response(response, status=status.HTTP_200_OK)
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'username', 'is_staff', 'is_active', 'email')
+        fields = ('first_name', 'last_name', 'username', 'email')
 
-class RareUserSerializer(serializers.ModelSerializer):
+class PriorityUserSerializer(serializers.ModelSerializer):
     user = UserSerializer(many=False)
     class Meta:
         model = PriorityUser
-        fields = ('user', 'bio', 'id', 'profile_image', 'created_on', 'user_to_change', 'subscribers')
+        fields = ('user',)
 
-class SubscriptionSerializer(serializers.ModelSerializer):
+class PrioritySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Subscription
-        fields = '__all__'
+        model = Priority
+        fields = ('priority_user', 'priority', 'why', 'how', 'is_public', 'creation_date')
+
+class WhatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = What
+        fields = ('id', 'priority', 'what', 'is_deleted')
+
+class HistorySerializer(serializers.ModelSerializer):
+    what = WhatSerializer(many=False)
+    class Meta:
+        model = History
+        fields = ('id', 'what', 'submission_date', 'goal_date', 'time_spent')
