@@ -18,7 +18,7 @@ class WhatViewSet(ViewSet):
         what.save()
         serializer = WhatSerializer(what, many=False, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    def destroy(self, pk, request):
+    def destroy(self, request, pk):
         what = What.objects.get(pk=pk)
         what.is_deleted = True
         what.save()
