@@ -104,6 +104,18 @@ class PriorityUserViewSet(ViewSet):
         response['history'] = history_serialized.data
         return Response(response, status=status.HTTP_200_OK)
 
+    @action(methods=["PUT"], detail=False)
+    def change_privacy(self, request):
+        priority = Priority.objects.get(priority_user__user=request.auth.user)
+        if request.data['is_public'] == "true":
+            priority.is_public = True
+        else:
+            priority.is_public = False
+        priority.save()
+
+        priority_serialized = PrioritySerializer(priority, context={'request': request})
+        return Response(priority_serialized.data, status=status.HTTP_204_NO_CONTENT)
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
