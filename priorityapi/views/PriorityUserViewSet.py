@@ -118,7 +118,7 @@ class PriorityUserSerializer(serializers.ModelSerializer):
 class PrioritySerializer(serializers.ModelSerializer):
     class Meta:
         model = Priority
-        fields = ('priority_user', 'priority', 'why', 'how', 'is_public', 'creation_date')
+        fields = ('id', 'priority_user', 'priority', 'why', 'how', 'is_public', 'creation_date')
 
 class WhatSerializer(serializers.ModelSerializer):
     class Meta:
