@@ -26,35 +26,6 @@ class PriorityUserViewSet(ViewSet):
         community_serialized = CommunityListSerializer(priorities, many=True, context={'request': request})
 
         return Response(community_serialized.data)
-    def update(self, request, pk):
-        if not request.auth.user.has_perm('rareapi.change_rareuser'):
-            raise PermissionDenied()
-        rareuser = PriorityUser.objects.get(pk=pk)
-        rareuser.user.first_name = request.data["firstName"]
-        rareuser.user.last_name = request.data["lastName"]
-        rareuser.user.username = request.data["username"]
-        rareuser.bio = request.data["bio"]
-        rareuser.user.email = request.data["email"]
-        rareuser.user.save()
-        rareuser.save()
-        return Response({}, status=status.HTTP_204_NO_CONTENT)
-    def destroy(self, request, pk):
-        if not request.auth.user.has_perm('rareapi.delete_rareuser'):
-            raise PermissionDenied()
-        try:
-            rareuser = PriorityUser.objects.get(pk=pk)
-            rareuser.delete()
-            return Response({}, status=status.HTTP_204_NO_CONTENT)
-        except Exception:
-            return HttpResponse(Exception)
-    @action(detail=False)
-    def inactive(self, request):
-        if not request.auth.user.has_perm('rareapi.view_rareuser'):
-            raise PermissionDenied()
-        users = PriorityUser.objects.order_by('user__first_name').exclude(user=request.user).exclude(user__is_active=True)
-        serializer = PriorityUserSerializer(users, many=True, context={'request': request})
-        return Response(serializer.data)
-
     @action(methods=["post", "delete" ], detail=False)
     def subscription(self, request):
         author = PriorityUser.objects.get(pk=request.data["author_id"])
