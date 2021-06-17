@@ -114,7 +114,7 @@ class PriorityUserViewSet(ViewSet):
         priority.save()
 
         priority_serialized = PrioritySerializer(priority, context={'request': request})
-        return Response(priority_serialized.data, status=status.HTTP_204_NO_CONTENT)
+        return Response(priority_serialized.data, status=status.HTTP_200_OK)
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
