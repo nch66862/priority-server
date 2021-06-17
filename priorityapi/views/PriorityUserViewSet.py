@@ -21,11 +21,11 @@ class PriorityUserViewSet(ViewSet):
             return Response(serializer.data)
         except Exception as ex:
             return HttpResponseServerError(ex)
-    #only returns list of active users
     def list(self, request):
-        users = PriorityUser.objects.order_by('user__first_name').exclude(user=request.user).exclude(user__is_active=False)
-        serializer = PriorityUserSerializer(users, many=True, context={'request': request})
-        return Response(serializer.data)
+        priorities = Priority.objects.filter(is_public=True).exclude(priority_user__user=request.auth.user)
+        community_serialized = CommunityListSerializer(priorities, many=True, context={'request': request})
+
+        return Response(community_serialized.data)
     def update(self, request, pk):
         if not request.auth.user.has_perm('rareapi.change_rareuser'):
             raise PermissionDenied()
@@ -142,3 +142,9 @@ class HistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = History
         fields = ('id', 'what', 'submission_date', 'goal_date', 'time_spent')
+
+class CommunityListSerializer(serializers.ModelSerializer):
+    priority_user = PriorityUserSerializer(many=False)
+    class Meta:
+        model = Priority
+        fields = ('id', 'priority_user', 'priority', 'why', 'how', 'is_public', 'creation_date')
