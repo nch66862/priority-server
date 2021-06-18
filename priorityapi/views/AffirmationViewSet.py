@@ -19,7 +19,7 @@ class AffirmationViewSet(ViewSet):
     def create(self, request):
         affirmation = Affirmation()
         affirmation.priority_user = PriorityUser.objects.get(user=request.auth.user)
-        affirmation.priority = request.data['priority_id']
+        affirmation.priority_id = request.data['priority_id']
         affirmation.affirmation = request.data['affirmation']
         affirmation.save()
         serializer = AffirmationSerializer(affirmation, many=False, context={'request': request})
@@ -49,5 +49,5 @@ class AffirmationSerializer(serializers.ModelSerializer):
     priority_user = PriorityUserSerializer(many=False)
     priority = PrioritySerializer(many=False)
     class Meta:
-        model = Priority
+        model = Affirmation
         fields = ('id', 'priority_user', 'priority', 'affirmation', 'created_on')
