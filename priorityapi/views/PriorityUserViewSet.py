@@ -28,45 +28,14 @@ class PriorityUserViewSet(ViewSet):
         except Exception as ex:
             return HttpResponseServerError(ex)
     def list(self, request):
+        priority_user = PriorityUser.objects.get(user=request.auth.user)
         priorities = Priority.objects.filter(is_public=True).exclude(priority_user__user=request.auth.user)
+        for priority in priorities:
+            priority.subscribed = priority_user in Subscription.objects.filter(creator_id=priority.priority_user_id)
         community_serialized = CommunityListSerializer(priorities, many=True, context={'request': request})
 
         return Response(community_serialized.data)
-    @action(methods=["post", "delete" ], detail=False)
-    def subscription(self, request):
-        author = PriorityUser.objects.get(pk=request.data["author_id"])
-        follower = PriorityUser.objects.get(user=request.auth.user)
 
-        if request.method == "POST":
-            subscription = Subscription()
-            subscription.author = author
-            subscription.follower = follower
-            try:
-                subscription.save()
-                return Response({}, status=status.HTTP_201_CREATED)
-            except Exception:
-                return HttpResponseServerError(Exception)
-        elif request.method == "DELETE":
-            try:
-                subscription = Subscription.objects.get(author=author, follower=follower, ended_on=None)
-                subscription.ended_on = timezone.now()
-                subscription.save()
-                return Response({}, status=status.HTTP_204_NO_CONTENT)
-            except Exception:
-                return HttpResponseServerError(Exception)
-    
-    @action(methods=["post"], detail=False)
-    def subscription_status(self, request):
-        author = PriorityUser.objects.get(pk=request.data["author_id"])
-        follower = PriorityUser.objects.get(user=request.auth.user)
-
-        try:
-            subscription = Subscription.objects.get(author=author, follower=follower, ended_on=None)
-            response = json.dumps({"subscribed": True})
-            return HttpResponse(response, content_type='application/json')
-        except:
-            response = json.dumps({"subscribed": False})
-            return HttpResponse(response, content_type='application/json')
     @action(methods=["GET"], detail=False)
     def my_profile(self, request):
         user = PriorityUser.objects.get(user=request.auth.user)
@@ -102,7 +71,7 @@ class PriorityUserSerializer(serializers.ModelSerializer):
     user = UserSerializer(many=False)
     class Meta:
         model = PriorityUser
-        fields = ('user',)
+        fields = ('user', 'subscribed')
 
 class PrioritySerializer(serializers.ModelSerializer):
     class Meta:
