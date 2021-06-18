@@ -31,7 +31,7 @@ class PriorityUserViewSet(ViewSet):
         priority_user = PriorityUser.objects.get(user=request.auth.user)
         priorities = Priority.objects.filter(is_public=True).exclude(priority_user__user=request.auth.user)
         for priority in priorities:
-            priority.subscribed = priority_user in Subscription.objects.filter(creator_id=priority.priority_user_id)
+            priority.priority_user.subscribed = priority_user in Subscription.objects.filter(creator_id=priority.priority_user_id)
         community_serialized = CommunityListSerializer(priorities, many=True, context={'request': request})
 
         return Response(community_serialized.data)
