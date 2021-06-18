@@ -17,13 +17,14 @@ from django.contrib import admin
 from django.conf.urls import include
 from django.urls import path
 from rest_framework import routers
-from priorityapi.views import register_user, login_user, check_active, PriorityUserViewSet, WhatViewSet, HistoryViewSet, PriorityViewSet
+from priorityapi.views import register_user, login_user, check_active, PriorityUserViewSet, WhatViewSet, HistoryViewSet, PriorityViewSet, AffirmationViewSet
 
 router = routers.DefaultRouter(trailing_slash=False)
 router.register(r'users', PriorityUserViewSet, 'user')
 router.register(r'what', WhatViewSet, 'what')
 router.register(r'history', HistoryViewSet, 'history')
 router.register(r'priority', PriorityViewSet, 'priority')
+router.register(r'affirmations', AffirmationViewSet, 'affirmation')
 
 urlpatterns = [
     path('', include(router.urls)),

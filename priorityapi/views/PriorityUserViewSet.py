@@ -14,11 +14,17 @@ import json
 class PriorityUserViewSet(ViewSet):
     def retrieve(self, request, pk):
         try:
-            user = PriorityUser.objects.get(pk=pk)
-            subscribers = Subscription.objects.filter(author=pk, ended_on=None).count()
-            user.subscribers = subscribers
-            serializer = PriorityUserSerializer(user, context={'request': request})
-            return Response(serializer.data)
+            priority = Priority.objects.get(pk=pk)
+            priority_serialized = PrioritySerializer(priority, context={'request': request})
+            user = PriorityUser.objects.get(user_id=priority.priority_user_id)
+            user_serialized = PriorityUserSerializer(user, context={'request': request})
+            histories = History.objects.filter(what__priority_id=priority.id)
+            history_serialized = HistorySerializer(histories, many=True, context={'request': request})
+            response = {}
+            response['user'] = user_serialized.data
+            response['priority'] = priority_serialized.data
+            response['history'] = history_serialized.data
+            return Response(response, status=status.HTTP_200_OK)
         except Exception as ex:
             return HttpResponseServerError(ex)
     def list(self, request):
