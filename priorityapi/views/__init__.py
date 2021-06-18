@@ -3,3 +3,4 @@ from .PermissionsViewSet import check_active
 from .PriorityUserViewSet import PriorityUserViewSet
 from .WhatViewSet import WhatViewSet
 from .HistoryViewSet import HistoryViewSet
+from .PriorityVewSet import PriorityViewSet
