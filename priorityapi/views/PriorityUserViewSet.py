@@ -65,13 +65,13 @@ class PriorityUserViewSet(ViewSet):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'username', 'email')
+        fields = ('id', 'first_name', 'last_name', 'username', 'email')
 
 class PriorityUserSerializer(serializers.ModelSerializer):
     user = UserSerializer(many=False)
     class Meta:
         model = PriorityUser
-        fields = ('user', 'subscribed')
+        fields = ('id', 'user', 'subscribed')
 
 class PrioritySerializer(serializers.ModelSerializer):
     class Meta:
