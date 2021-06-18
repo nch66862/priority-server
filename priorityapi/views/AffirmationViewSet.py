@@ -12,7 +12,7 @@ from django.utils import timezone
 import json
 
 class AffirmationViewSet(ViewSet):
-    def list(self, request, pk):
+    def retrieve(self, request, pk):
         affirmations = Affirmation.objects.filter(priority_id=pk)
         affirmations_serialized = AffirmationSerializer(affirmations, many=True, context={'request': request})
         return Response(affirmations_serialized.data, status=status.HTTP_200_OK)
