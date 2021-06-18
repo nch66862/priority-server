@@ -13,7 +13,10 @@ import json
 
 class AffirmationViewSet(ViewSet):
     def retrieve(self, request, pk):
+        priority_user = PriorityUser.objects.get(user=request.auth.user)
         affirmations = Affirmation.objects.filter(priority_id=pk)
+        for affirmation in affirmations:
+            affirmation.is_author = priority_user == affirmation.priority_user
         affirmations_serialized = AffirmationSerializer(affirmations, many=True, context={'request': request})
         return Response(affirmations_serialized.data, status=status.HTTP_200_OK)
     def create(self, request):
@@ -50,4 +53,4 @@ class AffirmationSerializer(serializers.ModelSerializer):
     priority = PrioritySerializer(many=False)
     class Meta:
         model = Affirmation
-        fields = ('id', 'priority_user', 'priority', 'affirmation', 'created_on')
+        fields = ('id', 'priority_user', 'priority', 'affirmation', 'created_on', 'is_author')
