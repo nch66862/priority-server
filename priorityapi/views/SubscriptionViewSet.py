@@ -10,16 +10,17 @@ from django.utils import timezone
 
 class SubscriptionViewSet(ViewSet):
     def create(self, request):
-        subscription = Subscription()
-        subscription.creator_id = request.data['creator_id']
-        subscription.subscriber = PriorityUser.objects.get(user=request.auth.user)
-        subscription.save()
-        serializer = SubscriptionSerializer(subscription, many=False, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    def destroy(self, request, pk):
-        subscription = Subscription.objects.get(pk=pk)
-        subscription.delete()
-        return Response({}, status=status.HTTP_204_NO_CONTENT)
+        if request.data['subscribed']:
+            subscription = Subscription()
+            subscription.creator_id = request.data['creator_id']
+            subscription.subscriber = PriorityUser.objects.get(user=request.auth.user)
+            subscription.save()
+            serializer = SubscriptionSerializer(subscription, many=False, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            subscription = Subscription.objects.get(creator_id=request.data['creator_id'], subscriber=request.auth.user)
+            subscription.delete()
+            return Response({}, status=status.HTTP_204_NO_CONTENT)
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
