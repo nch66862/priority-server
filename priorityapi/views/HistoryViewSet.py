@@ -74,11 +74,20 @@ class HistoryViewSet(ViewSet):
             'labels': [],
             'data': []
         }
+        # put all of the dates in for the labels along the x-axis of the line chart
+        for day_offset in range(8):
+            response['line_chart']['labels'].append(todays_date - timedelta(days=day_offset))
+        # query to get the time every day and add that y value for each x value
+        for day in response['line_chart']['labels']:
+            time_today_query = History.objects.filter(what__priority__priority_user=current_user, goal_date=day).aggregate(time_today=Sum('time_spent'))
+            time_today_dict = TimeTodaySerializer(time_today_query, many=False, context={'request': request}).data
+            if time_today_dict['time_today'] is not None:
+                response['line_chart']['data'].append(time_today_dict['time_today'])
+            else: response['line_chart']['data'].append(0)
+
 
         return Response(response, status=status.HTTP_200_OK)
 
-        # serializer = HistorySerializer(new_history, context={'request': request})
-        # return Response(serializer.data, status=status.HTTP_201_CREATED)
     def retrieve(self, request, pk):
         """
         builds statistics for the history of a priority_user with the provided pk
@@ -110,3 +119,8 @@ class TotalTimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = History
         fields = ('total_time',)
+
+class TimeTodaySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = History
+        fields = ('time_today',)
