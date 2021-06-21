@@ -18,16 +18,26 @@ class HistoryViewSet(ViewSet):
 
     def create(self, request):
         """
+        creates a new history record in the database
         """
         new_history = History()
         new_history.what_id = request.data["what_id"]
         new_history.goal_date = request.data["goal_date"]
         new_history.time_spent = request.data["time_spent"]
-
         new_history.save()
-
         serializer = HistorySerializer(new_history, context={'request': request})
-
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def list(self, request):
+        """
+        builds statistics for the history of the logged in user
+        """
+        serializer = HistorySerializer(new_history, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def retrieve(self, request, pk):
+        """
+        builds statistics for the history of a priority_user with the provided pk
+        """
+        serializer = HistorySerializer(new_history, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class HistorySerializer(serializers.ModelSerializer):
