@@ -30,8 +30,14 @@ class PriorityUserViewSet(ViewSet):
     def list(self, request):
         priority_user = PriorityUser.objects.get(user=request.auth.user)
         priorities = Priority.objects.filter(is_public=True).exclude(priority_user__user=request.auth.user)
+        # for every priority, see if the creator id on the subscription table matches the priority user id on the priority, then see if the user is in the subscription result
         for priority in priorities:
-            priority.priority_user.subscribed = priority_user in Subscription.objects.filter(creator_id=priority.priority_user_id)
+            matching_subscriptions = Subscription.objects.filter(creator_id=priority.priority_user_id)
+            for subscription in matching_subscriptions:
+                if priority_user.id == subscription.subscriber_id:
+                    priority.priority_user.subscribed = True
+                else:
+                    priority.priority_user.subscribed = False
         community_serialized = CommunityListSerializer(priorities, many=True, context={'request': request})
 
         return Response(community_serialized.data)
