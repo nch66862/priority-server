@@ -33,30 +33,48 @@ class HistoryViewSet(ViewSet):
         """
         builds statistics for the history of the logged in user
         """
+        # establish custom variable to send back
         response = {}
+
+        # Find a streak by adding a number to current streak. Start at today. Work backwards until no more histories or a date is skipped.
         todays_date = datetime.date(datetime.today())
         comparison_date = todays_date
         last_date = None
         current_streak = 0
         current_user = PriorityUser.objects.get(user=request.auth.user)
+        # Sort by the date - newest first
         histories = History.objects.filter(what__priority__priority_user=current_user).order_by('-goal_date')
         for history in histories:
+            # Have to have this initial check for multiple entries in the same day
             if history.goal_date == last_date:
                 None
+            # Counts up and sets the next date when the streak continues
             elif history.goal_date == comparison_date:
                 current_streak += 1
                 comparison_date = comparison_date - timedelta(days=1)
                 last_date = history.goal_date
+            # Breaks out of the loop if the streak ends
             else:
                 break
-        seven_day_time_spent = History.objects.filter(what__priority__priority_user=current_user, goal_date__range=[todays_date-timedelta(days=7), todays_date]).aggregate(week_total=Sum('time_spent'))
-        week_total = WeekTotalSerializer(seven_day_time_spent, many=False, context={'request': request})
-        total_time_query = History.objects.filter(what__priority__priority_user=current_user).aggregate(total_time=Sum('time_spent'))
-        total_time_dict = TotalTimeSerializer(total_time_query, many=False, context={'request': request})
-
+        #Add the streak to the response
         response['current_streak'] = current_streak
-        response['week_total'] = week_total.data['week_total']
-        response['total_time'] = total_time_dict.data['total_time']
+        
+        #Filter the history for the current user data only. limit to data only in the past week. total up the time for this data.
+        seven_day_time_spent = History.objects.filter(what__priority__priority_user=current_user, goal_date__range=[todays_date-timedelta(days=7), todays_date]).aggregate(week_total=Sum('time_spent'))
+        week_total_dict = WeekTotalSerializer(seven_day_time_spent, many=False, context={'request': request}).data
+        response['week_total'] = week_total_dict['week_total']
+
+        #Filter the history for the current user data only. limit to data only in the past week. total up the time for this data.
+        total_time_query = History.objects.filter(what__priority__priority_user=current_user).aggregate(total_time=Sum('time_spent'))
+        total_time_dict = TotalTimeSerializer(total_time_query, many=False, context={'request': request}).data
+        response['total_time'] = total_time_dict['total_time']
+
+        # Set up the data structure that chart.js needs
+        response['line_chart'] = {
+            'labels': [],
+            'data': []
+        }
+
         return Response(response, status=status.HTTP_200_OK)
 
         # serializer = HistorySerializer(new_history, context={'request': request})
