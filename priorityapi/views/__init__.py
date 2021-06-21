@@ -5,3 +5,4 @@ from .WhatViewSet import WhatViewSet
 from .HistoryViewSet import HistoryViewSet
 from .PriorityVewSet import PriorityViewSet
 from .AffirmationViewSet import AffirmationViewSet
+from .SubscriptionViewSet import SubscriptionViewSet
