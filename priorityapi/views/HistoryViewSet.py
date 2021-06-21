@@ -12,6 +12,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.parsers import MultiPartParser, FormParser
 from datetime import datetime, timedelta
+from django.db.models import Sum
 
 class HistoryViewSet(ViewSet):
     """Request handlers for Products in the Bangazon Platform"""
@@ -48,7 +49,11 @@ class HistoryViewSet(ViewSet):
                 last_date = history.goal_date
             else:
                 break
+        seven_day_time_spent = History.objects.filter(what__priority__priority_user=current_user, goal_date__range=[todays_date-timedelta(days=7), todays_date]).aggregate(week_total=Sum('time_spent'))
+        serializer = WeekTotalSerializer(seven_day_time_spent, many=False, context={'request': request})
+
         response['current_streak'] = current_streak
+        response['week_total'] = serializer.data
         return Response(response, status=status.HTTP_200_OK)
 
         # serializer = HistorySerializer(new_history, context={'request': request})
@@ -74,3 +79,8 @@ class HistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = History
         fields = ('id', 'what', 'submission_date', 'goal_date', 'time_spent')
+
+class WeekTotalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = History
+        fields = ('week_total',)
