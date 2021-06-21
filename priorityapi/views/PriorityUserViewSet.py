@@ -30,6 +30,7 @@ class PriorityUserViewSet(ViewSet):
     def list(self, request):
         priority_user = PriorityUser.objects.get(user=request.auth.user)
         priorities = Priority.objects.filter(is_public=True).exclude(priority_user__user=request.auth.user)
+
         # for every priority, see if the creator id on the subscription table matches the priority user id on the priority, then see if the user is in the subscription result
         for priority in priorities:
             matching_subscriptions = Subscription.objects.filter(creator_id=priority.priority_user_id)
@@ -38,6 +39,7 @@ class PriorityUserViewSet(ViewSet):
                     priority.priority_user.subscribed = True
                 else:
                     priority.priority_user.subscribed = False
+
         community_serialized = CommunityListSerializer(priorities, many=True, context={'request': request})
 
         return Response(community_serialized.data)
@@ -68,6 +70,23 @@ class PriorityUserViewSet(ViewSet):
         priority_serialized = PrioritySerializer(priority, context={'request': request})
         return Response(priority_serialized.data, status=status.HTTP_200_OK)
 
+    @action(methods=["GET"], detail=False)
+    def subscriptions(self, request):
+        priority_user = PriorityUser.objects.get(user=request.auth.user)
+        subscriptions = Subscription.objects.filter(subscriber=priority_user)
+        priorities = Priority.objects.filter(is_public=True).exclude(priority_user__user=request.auth.user)
+
+        def subscription_filter(priority):
+            for subscription in subscriptions:
+                if subscription.creator_id == priority.priority_user_id:
+                    return True
+            return False
+        priorities = filter(subscription_filter, priorities)
+        
+        subscriptions_serialized = SubscriptionListSerializer(priorities, many=True, context={'request': request})
+
+        return Response(subscriptions_serialized.data)
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -96,6 +115,12 @@ class HistorySerializer(serializers.ModelSerializer):
         fields = ('id', 'what', 'submission_date', 'goal_date', 'time_spent')
 
 class CommunityListSerializer(serializers.ModelSerializer):
+    priority_user = PriorityUserSerializer(many=False)
+    class Meta:
+        model = Priority
+        fields = ('id', 'priority_user', 'priority', 'why', 'how', 'is_public', 'creation_date')
+
+class SubscriptionListSerializer(serializers.ModelSerializer):
     priority_user = PriorityUserSerializer(many=False)
     class Meta:
         model = Priority
