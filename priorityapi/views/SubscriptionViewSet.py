@@ -18,7 +18,8 @@ class SubscriptionViewSet(ViewSet):
             serializer = SubscriptionSerializer(subscription, many=False, context={'request': request})
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            subscription = Subscription.objects.get(creator_id=request.data['creator_id'], subscriber=request.auth.user)
+            requesting_priority_user = PriorityUser.objects.get(user=request.auth.user)
+            subscription = Subscription.objects.get(creator_id=request.data['creator_id'], subscriber=requesting_priority_user)
             subscription.delete()
             return Response({}, status=status.HTTP_204_NO_CONTENT)
 
