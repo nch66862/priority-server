@@ -53,7 +53,7 @@ class HistoryViewSet(ViewSet):
         serializer = WeekTotalSerializer(seven_day_time_spent, many=False, context={'request': request})
 
         response['current_streak'] = current_streak
-        response['week_total'] = serializer.data
+        response['week_total'] = serializer.data['week_total']
         return Response(response, status=status.HTTP_200_OK)
 
         # serializer = HistorySerializer(new_history, context={'request': request})
