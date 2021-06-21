@@ -50,10 +50,13 @@ class HistoryViewSet(ViewSet):
             else:
                 break
         seven_day_time_spent = History.objects.filter(what__priority__priority_user=current_user, goal_date__range=[todays_date-timedelta(days=7), todays_date]).aggregate(week_total=Sum('time_spent'))
-        serializer = WeekTotalSerializer(seven_day_time_spent, many=False, context={'request': request})
+        week_total = WeekTotalSerializer(seven_day_time_spent, many=False, context={'request': request})
+        total_time_query = History.objects.filter(what__priority__priority_user=current_user).aggregate(total_time=Sum('time_spent'))
+        total_time_dict = TotalTimeSerializer(total_time_query, many=False, context={'request': request})
 
         response['current_streak'] = current_streak
-        response['week_total'] = serializer.data['week_total']
+        response['week_total'] = week_total.data['week_total']
+        response['total_time'] = total_time_dict.data['total_time']
         return Response(response, status=status.HTTP_200_OK)
 
         # serializer = HistorySerializer(new_history, context={'request': request})
@@ -84,3 +87,8 @@ class WeekTotalSerializer(serializers.ModelSerializer):
     class Meta:
         model = History
         fields = ('week_total',)
+
+class TotalTimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = History
+        fields = ('total_time',)

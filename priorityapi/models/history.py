@@ -15,3 +15,11 @@ class History(models.Model):
     @week_total.setter
     def week_total(self, value):
         self.__week_total = value
+
+    @property
+    def total_time(self):
+        return self.__total_time
+
+    @total_time.setter
+    def total_time(self, value):
+        self.__total_time = value
