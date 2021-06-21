@@ -33,7 +33,7 @@ class HistoryViewSet(ViewSet):
         builds statistics for the history of the logged in user
         """
         response = {}
-        todays_date = datetime.today()
+        todays_date = datetime.date(datetime.today())
         comparison_date = todays_date
         last_date = None
         current_streak = 0
@@ -47,8 +47,8 @@ class HistoryViewSet(ViewSet):
                 comparison_date = comparison_date - timedelta(days=1)
                 last_date = history.goal_date
             else:
-                response['current_streak'] = current_streak
                 break
+        response['current_streak'] = current_streak
         return Response(response, status=status.HTTP_200_OK)
 
         # serializer = HistorySerializer(new_history, context={'request': request})
