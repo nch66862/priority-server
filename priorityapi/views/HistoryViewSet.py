@@ -89,10 +89,10 @@ class HistoryViewSet(ViewSet):
         }
         # put all of the dates in for the labels along the x-axis of the line chart
         for day_offset in range(8):
-            response['line_chart']['labels'].append(
+            response['line_chart']['data']['labels'].append(
                 todays_date - timedelta(days=day_offset))
         # query to get the time every day and add that y value for each x value
-        for day in response['line_chart']['labels']:
+        for day in response['line_chart']['data']['labels']:
             time_today_query = History.objects.filter(
                 what__priority__priority_user=current_user, goal_date=day).aggregate(time_today=Sum('time_spent'))
             time_today_dict = TimeTodaySerializer(
