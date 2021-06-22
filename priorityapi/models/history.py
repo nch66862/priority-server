@@ -23,3 +23,11 @@ class History(models.Model):
     @total_time.setter
     def total_time(self, value):
         self.__total_time = value
+
+    @property
+    def time_today(self):
+        return self.__time_today
+
+    @time_today.setter
+    def time_today(self, value):
+        self.__time_today = value
