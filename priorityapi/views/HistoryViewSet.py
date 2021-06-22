@@ -83,7 +83,10 @@ class HistoryViewSet(ViewSet):
                 'labels': [],
                 'datasets': [{
                     'label': 'time',
-                    'data': []
+                    'data': [],
+                    'color': ['black'],
+                    'borderColor': ['black'],
+                    'borderWidth': 1
                 }]
             }
         }
