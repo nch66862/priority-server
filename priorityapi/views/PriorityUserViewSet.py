@@ -1,22 +1,18 @@
-from django.http.response import HttpResponse
 from rest_framework.decorators import action
 from priorityapi.models import PriorityUser, Subscription, History, What, Priority
 from django.contrib.auth.models import User
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import serializers
-from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseServerError
 from rest_framework import status
-from django.utils import timezone
-import json
 
 class PriorityUserViewSet(ViewSet):
     def retrieve(self, request, pk):
         try:
             priority = Priority.objects.get(pk=pk)
             priority_serialized = PrioritySerializer(priority, context={'request': request})
-            user = PriorityUser.objects.get(user_id=priority.priority_user_id)
+            user = PriorityUser.objects.get(pk=priority.priority_user_id)
             user_serialized = PriorityUserSerializer(user, context={'request': request})
             histories = History.objects.filter(what__priority_id=priority.id)
             history_serialized = HistorySerializer(histories, many=True, context={'request': request})
