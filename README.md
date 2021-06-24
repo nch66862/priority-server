@@ -5,7 +5,7 @@ The Python/Django API to the Priority React app.
 
 For detailed instructions, samples, and information, please visit the client repository below.
 
-### [Client](https://github.com/nch66862/priority-client)
+### [Link to Client Repo](https://github.com/nch66862/priority-client)
 
 ### Instructions for Local Use - Installing the server
 1. Clone down the repo with `git clone git@github.com:nch66862/priority-server.git`
