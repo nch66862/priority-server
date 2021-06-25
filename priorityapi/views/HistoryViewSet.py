@@ -1,17 +1,11 @@
 """View module for handling requests about products"""
 from priorityapi.models.priority import Priority
-from django.core.exceptions import ValidationError
-from rest_framework.decorators import action
 from priorityapi.models import History, PriorityUser, What
-import base64
-from django.core.files.base import ContentFile
-from django.http import HttpResponseServerError
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import serializers
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from rest_framework.parsers import MultiPartParser, FormParser
 from datetime import datetime, timedelta
 from django.db.models import Sum
 
@@ -98,6 +92,19 @@ class HistoryViewSet(ViewSet):
             else:
                 response['line_chart']['data'].append(0)
 
+        # Set up the data structure that chart.js needs for pie charts
+        response['pie_chart'] = {
+            'labels': [],
+            'data': []
+        }
+        # histories = History.objects.filter(what__priority__priority_user=current_user).annotate(Sum('informationunit__username', distinct=True))
+        whats = What.objects.filter(priority__priority_user=current_user).annotate(time_on_what=Sum('history__time_spent'))
+        # histories_list = WhatSerializer(histories, many=True, context={'request': request}).data
+        what_list = WhatPieSerializer(whats, many=True, context={'request': request}).data
+        for what in what_list:
+            response['pie_chart']['labels'].append(what['what'])
+            response['pie_chart']['data'].append(what['time_on_what'])
+
         return Response(response, status=status.HTTP_200_OK)
 
     def retrieve(self, request, pk):
@@ -166,8 +173,26 @@ class HistoryViewSet(ViewSet):
             else:
                 response['line_chart']['data'].append(0)
 
+        # Set up the data structure that chart.js needs for pie charts
+        response['pie_chart'] = {
+            'labels': [],
+            'data': []
+        }
+        # histories = History.objects.filter(what__priority__priority_user=current_user).annotate(Sum('informationunit__username', distinct=True))
+        whats = What.objects.filter(priority__priority_user=current_user).annotate(time_on_what=Sum('history__time_spent'))
+        # histories_list = WhatSerializer(histories, many=True, context={'request': request}).data
+        what_list = WhatPieSerializer(whats, many=True, context={'request': request}).data
+        for what in what_list:
+            response['pie_chart']['labels'].append(what['what'])
+            response['pie_chart']['data'].append(what['time_on_what'])
+
         return Response(response, status=status.HTTP_200_OK)
 
+
+class WhatPieSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = What
+        fields = ('id', 'priority', 'what', 'is_deleted', 'time_on_what')
 
 class WhatSerializer(serializers.ModelSerializer):
     class Meta:
